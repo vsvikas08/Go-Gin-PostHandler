@@ -28,7 +28,6 @@ func updatePost(c *gin.Context) {
 func getUserById(c *gin.Context) {}
 func createNewUser(c *gin.Context) {
 	var newUser User
-	// var req []byte
 	reqBody,_ := c.GetRawData()
 	if err := json.Unmarshal(reqBody,&newUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request body"})
@@ -42,11 +41,11 @@ func createNewUser(c *gin.Context) {
 	newUser.Id = string(id)
 	fileName := fmt.Sprintf("./data/users/%s_user.json",id)
 	file, err :=  os.Create(fileName)
-	defer file.Close()
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"message" : "Server error"})
 		return
 	}
+	defer file.Close()
 	data, err := json.Marshal(newUser)
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"message" : "Server error for writing data"})
