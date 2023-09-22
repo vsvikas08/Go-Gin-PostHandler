@@ -1,8 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +25,36 @@ func createPost(c *gin.Context) {
 func updatePost(c *gin.Context) {
 
 }
+func getUserById(c *gin.Context) {}
+func createNewUser(c *gin.Context) {
+	var newUser User
+	// var req []byte
+	reqBody,_ := c.GetRawData()
+	if err := json.Unmarshal(reqBody,&newUser); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request body"})
+		return
+	}
+	if newUser.Email == "" || newUser.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Name, Email  or Password is missing."})
+		return
+	} 
+	id := strconv.FormatInt(time.Now().Unix(),10)
+	newUser.Id = string(id)
+	fileName := fmt.Sprintf("./data/users/%s_user.json",id)
+	file, err :=  os.Create(fileName)
+	defer file.Close()
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"message" : "Server error"})
+		return
+	}
+	data, err := json.Marshal(newUser)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"message" : "Server error for writing data"})
+		return
+	}
+	file.Write(data)
+	c.JSON(http.StatusOK, gin.H{"data": newUser})
+}
 func main() {
 	fmt.Println("Hello Go Gin")
 	r := gin.Default()
@@ -31,6 +65,9 @@ func main() {
 	r.GET("/post",getPost)
 	r.POST("/post",createPost)
 	r.PUT("/post",updatePost)
+
+	r.GET("/user/:id",getUserById)
+	r.POST("/create_user",createNewUser)
 	
 
 	r.Run()

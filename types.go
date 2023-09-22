@@ -16,7 +16,7 @@ type Comment struct {
 }
 
 type User struct {
-	Id       string `json:"id"`
+	Id       string `json:"id,omitempty"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	password string `json:"password"`
