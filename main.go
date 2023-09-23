@@ -54,6 +54,9 @@ func createNewUser(c *gin.Context) {
 	file.Write(data)
 	c.JSON(http.StatusOK, gin.H{"data": newUser})
 }
+func commentOnPost(c *gin.Context) {
+	
+}
 func main() {
 	fmt.Println("Hello Go Gin")
 	r := gin.Default()
@@ -67,6 +70,8 @@ func main() {
 
 	r.GET("/user/:id",getUserById)
 	r.POST("/create_user",createNewUser)
+
+	r.POST("/comment/:pst_id",commentOnPost)
 	
 
 	r.Run()
