@@ -15,14 +15,31 @@ func getPost(c *gin.Context) {
 
 }
 func createPost(c *gin.Context) {
-	fmt.Println("/post triggered")
 	var newPost Post
 	reqBody,_ := c.GetRawData()
 	if err := json.Unmarshal(reqBody,&newPost); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request from user"})
 		return
 	}
-	c.JSON(http.StatusOK,gin.H{"data": newPost})
+	t := time.Now()
+	id := strconv.FormatInt(t.Unix(),10)
+	newPost.Id = id
+	newPost.Date = t.Format("2006-01-02")
+
+	fileName := fmt.Sprintf("./data/posts/%s_post.json",id)
+	file, err := os.Create(fileName)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"message": "Server error"})
+		return
+	}
+	defer file.Close()
+	data, err := json.Marshal(newPost)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"message": "server error for writing data"})
+		return
+	}
+	file.Write(data)
+	c.JSON(http.StatusCreated,gin.H{"data": newPost})
 }
 func updatePost(c *gin.Context) {
 
@@ -54,7 +71,7 @@ func createNewUser(c *gin.Context) {
 		return
 	}
 	file.Write(data)
-	c.JSON(http.StatusOK, gin.H{"data": newUser})
+	c.JSON(http.StatusCreated, gin.H{"data": newUser})
 }
 func commentOnPost(c *gin.Context) {
 	
