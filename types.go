@@ -4,7 +4,7 @@ type Post struct {
 	Id       string    `json:"id"`
 	Title    string    `json:"title"`
 	Date     string    `json:"date"`
-	Author   User      `json:"author"`
+	Author   string    `json:"author"`
 	Content  string    `json:"content"`
 	Comments []Comment `json:"comments"`
 }

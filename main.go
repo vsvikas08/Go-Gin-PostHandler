@@ -15,8 +15,10 @@ func getPost(c *gin.Context) {
 
 }
 func createPost(c *gin.Context) {
+	fmt.Println("/post triggered")
 	var newPost Post
-	if err := c.BindJSON(&newPost); err != nil {
+	reqBody,_ := c.GetRawData()
+	if err := json.Unmarshal(reqBody,&newPost); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request from user"})
 		return
 	}
