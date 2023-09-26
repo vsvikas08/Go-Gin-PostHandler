@@ -42,7 +42,28 @@ func createPost(c *gin.Context) {
 	c.JSON(http.StatusCreated,gin.H{"data": newPost})
 }
 func updatePost(c *gin.Context) {
-
+	reqBody,_ := c.GetRawData()
+	var data map[string]interface{}
+	if err := json.Unmarshal(reqBody,&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message" : "Request data error"})
+		return
+	}
+	fmt.Println("Request Data : ", data)
+	if data["id"] == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message" : "Request ID is missing"})
+		return
+	}
+	filename := fmt.Sprintf("./data/posts/%s_post.json",data["id"])
+	fmt.Println("File Name : ", filename)
+	file, err := os.OpenFile(filename, os.O_RDWR,0644)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message" : "Post id doesn't exist"})
+		return
+	}
+	defer file.Close()
+	fileData, _ := os.ReadFile(filename)
+	fmt.Println("FileData : ",fileData)
+	c.JSON(http.StatusAccepted, gin.H{"data" : fileData})
 }
 func getUserById(c *gin.Context) {}
 func createNewUser(c *gin.Context) {
