@@ -29,13 +29,13 @@ func createPost(c *gin.Context) {
 	fileName := fmt.Sprintf("./data/posts/%s_post.json",id)
 	file, err := os.Create(fileName)
 	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"message": "Server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Server error"})
 		return
 	}
 	defer file.Close()
 	data, err := json.Marshal(newPost)
 	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"message": "server error for writing data"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "server error for writing data"})
 		return
 	}
 	file.Write(data)
@@ -62,8 +62,25 @@ func updatePost(c *gin.Context) {
 	}
 	defer file.Close()
 	fileData, _ := os.ReadFile(filename)
-	fmt.Println("FileData : ",fileData)
-	c.JSON(http.StatusAccepted, gin.H{"data" : fileData})
+	var postData map[string]interface{}
+	err = json.Unmarshal(fileData,&postData)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message" : "Server error"})
+		return
+	}
+	for key, value := range data {
+		postData[key] = value
+	}
+	tempPost,_ := json.Marshal(postData)
+	var updatedPost Post
+	err = json.Unmarshal(tempPost,&updatedPost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message" : "Unmarshal error"})
+		return
+	}
+	byteData,_ := json.Marshal(updatedPost)
+	file.Write(byteData)
+	c.JSON(http.StatusAccepted, gin.H{"data" : updatedPost})
 }
 func getUserById(c *gin.Context) {}
 func createNewUser(c *gin.Context) {
@@ -82,13 +99,13 @@ func createNewUser(c *gin.Context) {
 	fileName := fmt.Sprintf("./data/users/%s_user.json",id)
 	file, err :=  os.Create(fileName)
 	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"message" : "Server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message" : "Server error"})
 		return
 	}
 	defer file.Close()
 	data, err := json.Marshal(newUser)
 	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"message" : "Server error for writing data"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message" : "Server error for writing data"})
 		return
 	}
 	file.Write(data)
